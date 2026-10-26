@@ -1,8 +1,8 @@
-# Constituição do projeto
+# Constituição da API de Cadastro de Produtos
 
-Versão: 1.0.0
+Versão: 2.0.0
 Data de aprovação: 2026-10-20
-Última alteração: 2026-10-20
+Última alteração: 2026-10-22
 
 
 ## Stack
@@ -34,7 +34,9 @@ Data de aprovação: 2026-10-20
 - Alterações na estrutura do banco DEVEM ser realizadas
   por migrations.
 
-- Bando de dados deve ser usado SqLite 
+- O banco de dados DEVE ser SQLite.
+
+- O projeto é uma API didática para cadastro e gerenciamento de produtos. A aplicação NÃO DEVE ser usada em produção sem uma revisão explícita de segurança, operação e privacidade.
 
 ## Arquitetura
 - As rotas da API DEVEM ser definidas em routes/api.php.

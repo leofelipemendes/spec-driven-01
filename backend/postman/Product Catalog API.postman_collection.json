@@ -1,0 +1,387 @@
+{
+  "info": {
+    "_postman_id": "f0251bdc-8392-4bd8-9d0b-81707d2f03cd",
+    "name": "Product Catalog API",
+    "description": "Collection para testar o CRUD de produtos, paginação e filtros. O servidor local padrão é http://localhost:8000/api. Execute a criação antes de consultar, atualizar ou excluir por ID.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Produtos",
+      "item": [
+        {
+          "name": "Listar produtos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            },
+            "description": "Lista produtos ativos com paginação padrão de 15 itens."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Resposta contém coleção paginada', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('data').that.is.an('array');",
+                  "    pm.expect(body).to.have.property('links');",
+                  "    pm.expect(body).to.have.property('meta');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar e paginar produtos",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products?name={{name}}&price={{price}}&category={{category}}&quantity={{quantity}}&page={{page}}&per_page={{perPage}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "{{name}}",
+                  "description": "Busca parcial por nome."
+                },
+                {
+                  "key": "price",
+                  "value": "{{price}}",
+                  "description": "Preço exato, por exemplo 19.90."
+                },
+                {
+                  "key": "category",
+                  "value": "{{category}}",
+                  "description": "Busca parcial por categoria."
+                },
+                {
+                  "key": "quantity",
+                  "value": "{{quantity}}",
+                  "description": "Quantidade exata."
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "per_page",
+                  "value": "{{perPage}}",
+                  "description": "Entre 1 e 100."
+                }
+              ]
+            },
+            "description": "Os parâmetros de filtro são opcionais e, quando combinados, são aplicados com AND."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const defaults = { name: 'notebook', price: '', category: 'Informatica', quantity: '', page: '1', perPage: '15' };",
+                  "Object.entries(defaults).forEach(([key, value]) => {",
+                  "    if (pm.variables.get(key) === undefined) pm.variables.set(key, value);",
+                  "});"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Resposta contém coleção paginada', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body).to.have.property('data').that.is.an('array');",
+                  "    pm.expect(body).to.have.property('links');",
+                  "    pm.expect(body).to.have.property('meta');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastrar produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Produto de teste Postman\",\n  \"price\": \"19.90\",\n  \"category\": \"Acessorios\",\n  \"quantity\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Produto criado com HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "const body = pm.response.json();",
+                  "pm.test('Resposta contém o produto criado', function () {",
+                  "    pm.expect(body.data).to.have.property('id');",
+                  "    pm.expect(body.data.price).to.eql('19.90');",
+                  "});",
+                  "if (body.data && body.data.id) {",
+                  "    pm.collectionVariables.set('productId', body.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consultar produto por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "description": "Execute depois de Cadastrar produto para preencher automaticamente productId."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200 e produto retornado', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().data.id).to.eql(Number(pm.collectionVariables.get('productId')));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Produto atualizado pelo Postman\",\n  \"price\": \"29.90\",\n  \"category\": \"Acessorios\",\n  \"quantity\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Produto atualizado com HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().data.name).to.eql('Produto atualizado pelo Postman');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar parcialmente produto",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nome atualizado parcialmente\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "description": "Atualiza somente os campos enviados; execute depois de cadastrar um produto."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Produto atualizado parcialmente com HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().data.name).to.eql('Nome atualizado parcialmente');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir produto logicamente",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "description": "Remove logicamente o produto; a resposta esperada é HTTP 204 sem corpo."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Produto excluído logicamente com HTTP 204 sem corpo', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "    pm.expect(pm.response.text()).to.eql('');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
